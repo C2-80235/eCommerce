@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-frontend
+spec:
+  replicas: 2 # Scale as needed
+  selector:
+    matchLabels:
+      app: ecommerce-frontend
+  template:
+    metadata:
+      labels:
+        app: ecommerce-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: shnk/ecommerce-frontend:latest # Replace with your actual image name
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      imagePullSecrets:
+      - name: your_registry_secret # Replace with your actual secret name
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-backend
+spec:
+  replicas: 2 # Scale as needed
+  selector:
+    matchLabels:
+      app: ecommerce-backend
+  template:
+    metadata:
+      labels:
+        app: ecommerce-backend
+    spec:
+      containers:
+      - name: backend
+        image: shnk/ecommerce-backend:latest # Replace with your actual image name
+        ports:
+        - containerPort: 5000 # Adjust port if needed
+          name: http
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      imagePullSecrets:
+      - name: your_registry_secret # Replace with your actual secret name
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-frontend-service
+spec:
+  selector:
+    app: ecommerce-frontend
+  ports:
+  - port: 80 # You can choose a different port if needed
+    targetPort: 80
+    name: http
+  type: NodePort # Use NodePort to expose the service through a random port
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-backend-service
+spec:
+  selector:
+    app: ecommerce-backend
+  ports:
+  - port: 80 # Adjust port if needed
+    targetPort: 5000
+    name: http
+  type: ClusterIP # Keep backend service internal

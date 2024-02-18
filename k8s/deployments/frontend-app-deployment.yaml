@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-app
+spec:
+  replicas: 1 # Adjust as needed
+  selector:
+    matchLabels:
+      app: main-app
+  template:
+    metadata:
+      labels:
+        app: main-app
+    spec:
+      containers:
+      - name: main-app
+        image: your_repo_name/main-backend:latest # Replace with your actual image
+        ports:
+        - containerPort: 8001
+        envFrom:
+        - configMapRef:
+            name: main-app-env
+        volumeMounts:
+        - name: main-app-volume
+          mountPath: /app
+        - name: static-volume
+          mountPath: /app/static
+        - name: media-volume
+          mountPath: /app/media
+      volumes:
+      - name: main-app-volume
+        persistentVolumeClaim:
+          claimName: main-app-pvc
+      - name: static-volume
+        persistentVolumeClaim:
+          claimName: static-pvc
+      - name: media-volume
+        persistentVolumeClaim:
+          claimName: media-pvc
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: main-app-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi # Adjust as needed
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi # Adjust as needed
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi # Adjust as needed
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: main-app-env
+data:
+  POSTGRES_USER: ${MAIN_DB_USER}
+  POSTGRES_PASSWORD: ${MAIN_DB_PASSWORD}
+  POSTGRES_DB: ${MAIN_DB_DATABASE}
+  # Add other environment variables as needed
