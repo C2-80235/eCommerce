@@ -32,14 +32,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
-    volumes:
+    volumes: 
       - ./frontend:/app
     depends_on:
       - main_app
 
   ecommerce_db:
     image: 'postgres:14.1-alpine'
-    restart: always
+    restart: always 
     environment:
       POSTGRES_USER: ${MAIN_DB_USER}
       POSTGRES_PASSWORD: ${MAIN_DB_PASSWORD}

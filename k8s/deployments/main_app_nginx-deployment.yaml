@@ -1,33 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: main-app-nginx
+  name: nginx-app
 spec:
-  replicas: 1 # Adjust as needed
+  replicas: 1
   selector:
     matchLabels:
-      app: main-app-nginx
+      app: nginx-app
   template:
     metadata:
       labels:
-        app: main-app-nginx
+        app: nginx-app
     spec:
       containers:
-      - name: nginx
-        image: nginx:latest
+      - name: nginx-app
+        image: your-nginx-image:latest  # Replace with your actual image name and tag
         ports:
-        - containerPort: 80
-        volumeMounts:
-        - name: static-volume
-          mountPath: /app/static
-        - name: media-volume
-          mountPath: /app/media
-      dependsOn:
-      - main-app
-      volumes:
-      - name: static-volume
-        persistentVolumeClaim:
-          claimName: static-pvc
-      - name: media-volume
-        persistentVolumeClaim:
-          claimName: media-pvc
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx-app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: NodePort

@@ -1,38 +1,72 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-app
+  name: backend-app
 spec:
-  replicas: 1 # Adjust as needed
+  replicas: 1
   selector:
     matchLabels:
-      app: frontend-app
+      app: backend-app
   template:
     metadata:
       labels:
-        app: frontend-app
+        app: backend-app
     spec:
       containers:
-      - name: frontend
-        image: your_repo_name/frontend:latest # Replace with your actual image
+      - name: backend-app
+        image: your-backend-image:latest  # Replace with your actual image name and tag
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: REDIS_PASSWORD
+        - name: DJANGO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DJANGO_SECRET_KEY
         ports:
-        - containerPort: 80
+        - containerPort: 8001
+      - name: postgres
+        image: postgres:14.1-alpine  # Replace with your PostgreSQL image and version
+        env:
+        - name: POSTGRES_USER
+          value: ${MAIN_DB_USER}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          value: ${MAIN_DB_DATABASE}
         volumeMounts:
-        - name: frontend-volume
-          mountPath: /app
-      volumes:
-      - name: frontend-volume
-        persistentVolumeClaim:
-          claimName: frontend-pvc
-
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
 ---
-
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend-app
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+  type: NodePort
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: frontend-pvc
+  name: postgres-data
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
+      storage: 5Gi  # Set the desired storage size
