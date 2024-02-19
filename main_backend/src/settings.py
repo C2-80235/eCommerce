@@ -211,7 +211,7 @@ class Prod(Dev):
     ADMINS = [("Abdoo", "abdoohossamm@outlook.com"), ("abdoohossamm", "kmabdo28@gmail.com")]
     DATABASES = {
         'default': {
-            'ENGINE': f"django.db.backends.{os.environ.get('MAIN_DB_CONNECTION')}",
+            'ENGINE': 'ecommerce_db',
             'NAME': os.environ.get('MAIN_DB_DATABASE'),
             'USER': os.environ.get('MAIN_DB_USERNAME'),
             'PASSWORD': os.environ.get('MAIN_DB_PASSWORD'),
