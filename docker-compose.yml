@@ -41,9 +41,9 @@ services:
     image: 'postgres:14.1-alpine'
     restart: always 
     environment:
-      POSTGRES_USER: ${MAIN_DB_USERNAME}
-      POSTGRES_PASSWORD: ${MAIN_DB_PASSWORD}
-      POSTGRES_DB: ${MAIN_DB_DATABASE}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: main
       PGDATA: /var/lib/postgresql/ecommerce/data
     volumes:
       - ecommerce_db:/var/lib/postgresql/ecommerce/data
